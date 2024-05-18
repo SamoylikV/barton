@@ -1,0 +1,5 @@
+.__pycache__
+..venv
+.tg_bot/__pycache__
+./barton/__pycache__
+./barton/migrations
