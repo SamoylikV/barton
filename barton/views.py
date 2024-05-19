@@ -17,6 +17,10 @@ def update_user(request, tg_id):
     user = get_object_or_404(User, tg_id=tg_id)
     user.email = request.POST.get('email', user.email)
     user.number = request.POST.get('number', user.number)
+    user.name = request.POST.get('name', user.name)
+    user.surname = request.POST.get('surname', user.surname)
+    user.subscription_signup_date = request.POST.get('subscription_signup_date', user.subscription_signup_date)
+    user.subscription_expiration = request.POST.get('subscription_expiration', user.subscription_expiration)
     user.save()
     return JsonResponse({'message': 'User updated'}, status=200)
 

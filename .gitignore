@@ -1,5 +1,10 @@
-.__pycache__
-..venv
-.tg_bot/__pycache__
-./barton/__pycache__
-./barton/migrations
+.env
+**/__pycache__/
+**/migrations/
+.DS_Store
+*.pyc
+*.egg-info
+*.egg
+*.log
+*.pid
+.venv/
