@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import User
+from .models import User, Labels
 from django.shortcuts import render, get_object_or_404
 @csrf_exempt
 def create_user(request):
@@ -29,8 +29,8 @@ def delete_user(request, tg_id):
     user = get_object_or_404(User, tg_id=tg_id)
     user.delete()
     return JsonResponse({'message': 'User deleted'}, status=200)
-@csrf_exempt
 
+@csrf_exempt
 def user_list(request):
     users = User.objects.all()
     data = [{"tg_id": user.tg_id, "email": user.email, "number": user.number} for user in users]
@@ -39,4 +39,10 @@ def user_list(request):
 def user_detail(request, tg_id):
     user = get_object_or_404(User, tg_id=tg_id)
     data = {"tg_id": user.tg_id, "email": user.email, "number": user.number, "name": user.name, "surname": user.surname, "subscription_signup_date": user.subscription_signup_date, "subscription_expiration": user.subscription_expiration}
+    return JsonResponse(data)
+
+@csrf_exempt
+def get_label_text(request):
+    label = get_object_or_404(Labels, name=request.GET.get('name'))
+    data = {"text": label.text}
     return JsonResponse(data)

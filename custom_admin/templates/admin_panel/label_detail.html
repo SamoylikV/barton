@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Label Detail</title>
+</head>
+<body>
+    <h1>Label Detail</h1>
+    <p>Name: {{ label.name }}</p>
+    <p>Text: {{ label.text }}</p>
+    <p>Tag: {{ label.tag }}</p>
+    <a href="{% url 'update_label' label.name %}">Edit</a>
+    <a href="{% url 'delete_label' label.name %}">Delete</a>
+    <a href="{% url 'label_list' %}">Back to list</a>
+</body>
+</html>
