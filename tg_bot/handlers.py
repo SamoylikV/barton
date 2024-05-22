@@ -1,7 +1,10 @@
 from aiogram.types import Message, CallbackQuery, KeyboardButton, ReplyKeyboardMarkup
 from aiogram_dialog import DialogManager, StartMode
+from aiogram_dialog.widgets.kbd import Button
 import aiohttp
 import os
+from dialogs import GetPhoneSG, MainSG
+from datetime import datetime
 
 BASE_URL = os.getenv('BASE_URL')
 
@@ -20,7 +23,6 @@ async def get_contact_handler(msg: Message, dialog_manager: DialogManager):
         'tg_id': msg.from_user.id,
         'number': phone_number
     }
-
     async with aiohttp.ClientSession() as session:
         async with session.post(f'{BASE_URL}/users/create/', data=user_data) as resp:
             if resp.status == 201:
@@ -31,3 +33,4 @@ async def get_contact_handler(msg: Message, dialog_manager: DialogManager):
                         await dialog_manager.start(GetPhoneSG.confirm, mode=StartMode.RESET_STACK, data={'phone_number': phone_number})
             else:
                 await msg.reply("Что-то пошло не так. Попробуйте ещё раз.")
+                

@@ -6,7 +6,7 @@ from aiogram.enums import ContentType
 from aiogram.filters import CommandStart
 from dotenv import load_dotenv
 from handlers import cmd_start, get_contact_handler
-from dialogs import get_phone, get_tier
+from dialogs import get_phone, get_tier, main_menu
 from aiogram_dialog import setup_dialogs
 
 load_dotenv()
@@ -21,6 +21,7 @@ async def main():
     dp.message.register(get_contact_handler, F.content_type == ContentType.CONTACT)
     dp.include_router(get_phone)
     dp.include_router(get_tier)
+    dp.include_router(main_menu)
     setup_dialogs(dp)
     await dp.start_polling(bot)
 

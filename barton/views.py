@@ -38,5 +38,5 @@ def user_list(request):
 @csrf_exempt
 def user_detail(request, tg_id):
     user = get_object_or_404(User, tg_id=tg_id)
-    data = {"tg_id": user.tg_id, "email": user.email, "number": user.number}
+    data = {"tg_id": user.tg_id, "email": user.email, "number": user.number, "name": user.name, "surname": user.surname, "subscription_signup_date": user.subscription_signup_date, "subscription_expiration": user.subscription_expiration}
     return JsonResponse(data)
