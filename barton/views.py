@@ -42,7 +42,7 @@ def user_detail(request, tg_id):
     return JsonResponse(data)
 
 @csrf_exempt
-def get_label_text(request):
-    label = get_object_or_404(Labels, name=request.GET.get('name'))
+def get_label_text(request, name):
+    label = get_object_or_404(Labels, name=name)
     data = {"text": label.text}
     return JsonResponse(data)

@@ -9,6 +9,6 @@ urlpatterns = [
     path('users/delete/<str:tg_id>/', views.delete_user, name='delete_user'),
     path('users/<str:tg_id>/', views.user_detail, name='user_detail'),
     path('users/', views.user_list, name='user_list'),
-    path('labels/', views.get_label_text, name='labels'),
+    path('labels/<str:name>/', views.get_label_text, name='labels'),
     path('admin_panel/', include('custom_admin.urls'))
 ]
