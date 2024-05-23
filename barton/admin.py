@@ -1,5 +1,5 @@
 from django.contrib import admin
-from barton.models import User, Labels
+from barton.models import User, Labels, Chats, Events
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
@@ -10,3 +10,14 @@ class UserAdmin(admin.ModelAdmin):
 class LabelsAdmin(admin.ModelAdmin):
     list_display = ('name', 'text', 'tag')
     search_fields = ('name', 'text')
+    
+    
+@admin.register(Chats)
+class ChatAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name')
+    search_fields = ('name',)
+
+@admin.register(Events)
+class EventAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'date')
+    search_fields = ('name',)

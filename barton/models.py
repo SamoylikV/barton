@@ -29,3 +29,18 @@ class Labels(models.Model):
 
     def __str__(self):
         return self.name
+    
+class Events(models.Model):
+    name = models.CharField(max_length=100)
+    text = models.TextField(blank=True)
+    date = models.DateTimeField()
+    
+    def __str__(self):
+        return self.name
+    
+class Chats(models.Model):
+    name = models.CharField(max_length=100)
+    link = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.name

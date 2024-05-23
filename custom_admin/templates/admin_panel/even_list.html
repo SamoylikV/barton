@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events List</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <h2>Events</h2>
+    <a href="{% url 'create_event' %}">Create New Event</a>
+    <ul>
+        {% for event in events %}
+            <li>
+                {{ event.title }} - {{ event.start_time }} to {{ event.end_time }}
+                <a href="{% url 'update_event' event.pk %}">Edit</a>
+                <a href="{% url 'delete_event' event.pk %}">Delete</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

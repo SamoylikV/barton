@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import User, Labels
+from .models import User, Labels, Chats, Events
 from django.shortcuts import render, get_object_or_404
 @csrf_exempt
 def create_user(request):
@@ -46,3 +46,15 @@ def get_label_text(request, name):
     label = get_object_or_404(Labels, name=name)
     data = {"text": label.text}
     return JsonResponse(data)
+
+@csrf_exempt
+def get_chats(request):
+    chats = Chats.objects.all()
+    data = [{"chat_id": chat.chat_id, "chat_name": chat.chat_name} for chat in chats]
+    return JsonResponse(data, safe=False)
+
+@csrf_exempt
+def get_events(request):
+    events = Events.objects.all()
+    data = [{"event_id": event.event_id, "event_name": event.event_name, "event_date": event.event_date} for event in events]
+    return JsonResponse(data, safe=False)
