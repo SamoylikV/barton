@@ -8,3 +8,4 @@
 *.log
 *.pid
 .venv/
+*.json

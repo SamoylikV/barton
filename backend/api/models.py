@@ -1,11 +1,5 @@
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-import json
-import os
-
-def get_cache_file_path():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), '../barton_bot/label_cache.json')
+from django.utils import timezone
 
 class User(models.Model):
     user_id = models.AutoField(primary_key=True)
@@ -16,7 +10,10 @@ class User(models.Model):
     surname = models.CharField(max_length=100, blank=True, null=True)
     subscription_signup_date = models.DateTimeField(blank=True, null=True)
     subscription_expiration = models.DateTimeField(blank=True, null=True)
-
+ 
+    def has_subscription_expired(self):
+        return self.subscription_expiration and self.subscription_expiration < timezone.now()
+    
     def __str__(self):
         return self.email
 
@@ -58,13 +55,3 @@ class Receipts(models.Model):
 
     def __str__(self):
         return self.name
-
-def update_label_cache():
-    labels = {label.name: label.text for label in Labels.objects.all()}
-    cache_file_path = get_cache_file_path()
-    with open(cache_file_path, 'w') as cache_file:
-        json.dump(labels, cache_file)
-
-@receiver(post_save, sender=Labels)
-def update_label_cache_signal(sender, instance, **kwargs):
-    update_label_cache()

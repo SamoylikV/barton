@@ -1,5 +1,5 @@
 from django import forms
-from barton.models import Labels, Events, Chats
+from api.models import Labels, Events, Chats
 
 class LabelsForm(forms.ModelForm):
     class Meta:

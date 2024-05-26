@@ -15,15 +15,15 @@ from asgiref.sync import sync_to_async
 
 
 load_dotenv()
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'barton.settings')
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../backend")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api.settings')
 django.setup()
 
 API_TOKEN = os.getenv('API_TOKEN')
 dp = Dispatcher()
 
 async def initialize_cache_if_needed():
-    from barton.models import update_label_cache, get_cache_file_path
+    from api.signals import update_label_cache, get_cache_file_path
     cache_file_path = get_cache_file_path()
     if not os.path.exists(cache_file_path):
         await sync_to_async(update_label_cache)()

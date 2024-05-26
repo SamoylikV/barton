@@ -1,6 +1,7 @@
 from aiogram.types import Message, CallbackQuery, KeyboardButton, ReplyKeyboardMarkup
 from aiogram_dialog import DialogManager, StartMode, Dialog
 from aiogram_dialog.widgets.kbd import Button
+from aiogram import Bot
 import aiohttp
 import asyncio
 import os
@@ -121,3 +122,17 @@ async def on_platform_click(callback: CallbackQuery, button: Button, dialog_mana
                     
 async def on_back_click(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     await dialog_manager.switch_to(MainSG.main)
+    
+async def check_and_remove_expired_members(bot: Bot, chat_id: int, base_url: str):
+    async with aiohttp.ClientSession() as session:
+        members = await bot.get_chat_administrators(chat_id)
+        for member in members:
+            user_id = member.user.id
+            async with session.get(f'{base_url}/users/{user_id}') as resp:
+                if resp.status == 200:
+                    user_data = await resp.json()
+                    subscription_expiration_date = user_data.get('subscription_expiration')
+
+                    if subscription_expiration_date and datetime.fromisoformat(subscription_expiration_date) < datetime.now():
+                        await bot.kick_chat_member(chat_id, user_id)
+                        print(f"User {user_id} has been removed from the group.")

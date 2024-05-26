@@ -1,5 +1,5 @@
 from django.contrib import admin
-from barton.models import User, Labels, Chats, Events
+from api.models import User, Labels, Chats, Events
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):

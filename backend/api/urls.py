@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from . import views
+from custom_admin.views import create_label, update_label, delete_label
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -9,6 +10,9 @@ urlpatterns = [
     path('users/delete/<str:tg_id>/', views.delete_user, name='delete_user'),
     path('users/<str:tg_id>/', views.user_detail, name='user_detail'),
     path('users/', views.user_list, name='user_list'),
+    path('labels/create/', create_label, name='create_label'),
+    path('labels/update/<str:name>/', update_label, name='update_label'),
+    path('labels/delete/<str:name>/', delete_label, name='delete_label'),
     path('labels/<str:name>/', views.get_label_text, name='labels'),
     path('labels/all/', views.get_all_labels, name='all_labels'),
     # path('chats/', views.chat_list, name='chat_list'),

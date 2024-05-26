@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from barton.models import User, Labels, Events, Chats
+from api.models import User, Labels, Events, Chats
 from .forms import LabelsForm, EventsForm, ChatsForm
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
