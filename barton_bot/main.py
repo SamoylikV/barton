@@ -1,6 +1,8 @@
 import os
+import sys
 import logging
 import asyncio
+import django
 from aiogram import Bot, Dispatcher, F
 from aiogram.enums import ContentType
 from aiogram.filters import CommandStart
@@ -8,11 +10,23 @@ from dotenv import load_dotenv
 from handlers import cmd_start, get_contact_handler
 from dialogs import get_phone, get_tier, main_menu
 from aiogram_dialog import setup_dialogs
+from handlers import initialize_labels_cache
+from asgiref.sync import sync_to_async
+
 
 load_dotenv()
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'barton.settings')
+django.setup()
 
 API_TOKEN = os.getenv('API_TOKEN')
 dp = Dispatcher()
+
+async def initialize_cache_if_needed():
+    from barton.models import update_label_cache, get_cache_file_path
+    cache_file_path = get_cache_file_path()
+    if not os.path.exists(cache_file_path):
+        await sync_to_async(update_label_cache)()
 
 async def main():
     logging.basicConfig(level=logging.INFO)
@@ -23,6 +37,8 @@ async def main():
     dp.include_router(get_tier)
     dp.include_router(main_menu)
     setup_dialogs(dp)
+    await initialize_cache_if_needed()
+    await initialize_labels_cache()
     await dp.start_polling(bot)
 
 if __name__ == '__main__':

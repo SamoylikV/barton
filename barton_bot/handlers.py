@@ -1,33 +1,65 @@
-from aiogram_dialog import Dialog, Window, DialogManager, StartMode
+from aiogram.types import Message, CallbackQuery, KeyboardButton, ReplyKeyboardMarkup
+from aiogram_dialog import DialogManager, StartMode, Dialog
 from aiogram_dialog.widgets.kbd import Button
-from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.text import Const, Format
-from aiogram_dialog.widgets.markup.reply_keyboard import ReplyKeyboardFactory
-from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery, Message
-from datetime import datetime
-from asgiref.sync import async_to_sync
 import aiohttp
+import asyncio
 import os
+from states import GetPhoneSG, GetInfoSG, MainSG
+from datetime import datetime
+import json
+
+
 
 BASE_URL = os.getenv('BASE_URL')
+CACHE_FILE = 'label_cache.json'
+labels_cache = None
 
-class GetPhoneSG(StatesGroup):
-    confirm = State()
-    ready = State()
-    
-class GetInfoSG(StatesGroup):
-    choose_tier = State()
-    get_name = State()
-    get_surname = State()
-    get_email = State()
-    final = State()
+async def load_labels_from_cache():
+    if os.path.exists(CACHE_FILE):
+        with open(CACHE_FILE, 'r') as cache_file:
+            return json.load(cache_file)
+    return {}
 
-class MainSG(StatesGroup):
-    main = State()
-    platform = State()
-    declined = State()
+async def initialize_labels_cache():
+    global labels_cache
+    labels_cache = await load_labels_from_cache()
 
+async def get_label(name: str):
+    if labels_cache is None:
+        await initialize_labels_cache()
+    return labels_cache.get(name)
+
+async def cmd_start(msg: Message, dialog_manager: DialogManager):
+    await send_contact(msg)
+
+async def send_contact(msg: Message):
+    if msg.chat.type == 'private':
+        markup = ReplyKeyboardMarkup(keyboard=[[
+            KeyboardButton(text="Поделиться контактом", request_contact=True)
+        ]], resize_keyboard=True, one_time_keyboard=True)
+        # await msg.reply("Чтобы продолжить пользоваться ботом, вам нужно подтвердить свой номер.", reply_markup=markup)
+        await msg.reply(await get_label('give_number'), reply_markup=markup)
+    else:
+        await msg.reply("123")
+
+async def get_contact_handler(msg: Message, dialog_manager: DialogManager):
+    phone_number = msg.contact.phone_number
+    user_data = {
+        'tg_id': msg.from_user.id,
+        'number': phone_number
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.post(f'{BASE_URL}/users/create/', data=user_data) as resp:
+            if resp.status == 201:
+                await dialog_manager.start(GetPhoneSG.confirm, mode=StartMode.RESET_STACK, data={'phone_number': phone_number})
+            elif resp.status == 200:
+                async with session.post(f'{BASE_URL}/users/update/{msg.from_user.id}/', data=user_data) as update_resp:
+                    if update_resp.status == 200:
+                        await dialog_manager.start(GetPhoneSG.confirm, mode=StartMode.RESET_STACK, data={'phone_number': phone_number})
+            else:
+                await msg.reply(await get_label('error'))
+                # await msg.reply("Что-то пошло не так. Попробуйте ещё раз.")
+                
 async def on_confirm_click(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     if button.widget_id.startswith('choose_tier'):
         dialog_manager.dialog_data['tier'] = button.widget_id
@@ -42,8 +74,8 @@ async def get_label(name: str):
             if resp.status == 200:
                 label = await resp.json()
                 return label.get('text')
-                
-                
+            
+            
 async def send_payment_link(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     tier = dialog_manager.dialog_data.get('tier')
     if tier == 'choose_tier_1':
@@ -89,67 +121,3 @@ async def on_platform_click(callback: CallbackQuery, button: Button, dialog_mana
                     
 async def on_back_click(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     await dialog_manager.switch_to(MainSG.main)
-    
-
-get_phone = Dialog(
-    Window(
-        Format("Твой номер: {start_data[phone_number]}?"),
-        Button(Const(async_to_sync(get_label)('next')), id='confirm', on_click=on_ready_click),
-        state=GetPhoneSG.confirm
-    ),
-    Window(Const(async_to_sync(get_label)('all_done')), state=GetPhoneSG.ready)
-)
-
-get_tier = Dialog(
-    Window(
-        Const(async_to_sync(get_label)('choose_tier')),
-        Button(Const(async_to_sync(get_label)('tier_1')), id='choose_tier_1', on_click=on_confirm_click),
-        Button(Const(async_to_sync(get_label)('tier_2')), id='choose_tier_2', on_click=on_confirm_click),
-        Button(Const(async_to_sync(get_label)('tier_3')), id='choose_tier_3', on_click=on_confirm_click),
-        state=GetInfoSG.choose_tier,
-    ),
-    Window(
-        Const(async_to_sync(get_label)('name')),
-        MessageInput(get_name),
-        state=GetInfoSG.get_name,
-    ),
-    Window(
-        Const(async_to_sync(get_label)('surname')),
-        MessageInput(get_surname),
-        state=GetInfoSG.get_surname
-    ),
-    Window(
-        Const(async_to_sync(get_label)('email')),
-        MessageInput(get_email),
-        state=GetInfoSG.get_email
-    ),
-    Window(
-        Const(async_to_sync(get_label)('thanks')),
-        Button(Const(async_to_sync(get_label)('get_link')), id='get_payment_link', on_click=send_payment_link),
-        state=GetInfoSG.final
-    )
-)
-
-main_menu = Dialog(
-    Window(
-        Const(async_to_sync(get_label)('menu')),
-        Button(Const(async_to_sync(get_label)('platform')), id='platform', on_click=on_platform_click),
-        Button(Const(async_to_sync(get_label)('library')), id='library'),
-        Button(Const(async_to_sync(get_label)('free_help')), id='free_help'),
-        Button(Const(async_to_sync(get_label)('club_discount')), id='club_discount'),
-        Button(Const(async_to_sync(get_label)('neuro_mark')), id='neuro_mark'),
-        Button(Const(async_to_sync(get_label)('nearest_events')), id='nearest_events'),
-        markup_factory=ReplyKeyboardFactory(resize_keyboard=True, one_time_keyboard=False),
-        state=MainSG.main
-    ),
-    Window(
-        Const(async_to_sync(get_label)('platform')),
-        Button(Const(async_to_sync(get_label)('back')), id='back', on_click=on_back_click),
-        state=MainSG.platform
-    ),
-    Window(
-        Const(async_to_sync(get_label)('declined')),
-        Button(Const(async_to_sync(get_label)('back')), id='back', on_click=on_back_click),
-        state=MainSG.declined
-    )
-)

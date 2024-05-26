@@ -48,6 +48,12 @@ def get_label_text(request, name):
     return JsonResponse(data)
 
 @csrf_exempt
+def get_all_labels(request):
+    labels = Labels.objects.all()
+    data = [{"name": label.name, "text": label.text, "tag": label.tag} for label in labels]
+    return JsonResponse(data, safe=False)
+
+@csrf_exempt
 def get_chats(request):
     chats = Chats.objects.all()
     data = [{"chat_id": chat.chat_id, "chat_name": chat.chat_name} for chat in chats]
