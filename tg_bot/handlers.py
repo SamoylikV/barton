@@ -5,11 +5,15 @@ from aiogram import Bot
 import aiohttp
 import asyncio
 import os
+import sys
 from states import GetPhoneSG, GetInfoSG, MainSG
 from datetime import datetime
 import json
+from django.utils import timezone
+from asgiref.sync import sync_to_async
 
-
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../backend")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api.settings')
 
 BASE_URL = os.getenv('BASE_URL')
 CACHE_FILE = 'label_cache.json'
@@ -31,7 +35,10 @@ async def get_label(name: str):
     return labels_cache.get(name)
 
 async def cmd_start(msg: Message, dialog_manager: DialogManager):
-    await send_contact(msg)
+    if msg.chat.type == 'private':
+        await send_contact(msg)
+    else:
+        await check_subscriptions(msg.chat.id)
 
 async def send_contact(msg: Message):
     if msg.chat.type == 'private':
@@ -123,16 +130,15 @@ async def on_platform_click(callback: CallbackQuery, button: Button, dialog_mana
 async def on_back_click(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     await dialog_manager.switch_to(MainSG.main)
     
-async def check_and_remove_expired_members(bot: Bot, chat_id: int, base_url: str):
-    async with aiohttp.ClientSession() as session:
-        members = await bot.get_chat_administrators(chat_id)
-        for member in members:
-            user_id = member.user.id
-            async with session.get(f'{base_url}/users/{user_id}') as resp:
-                if resp.status == 200:
-                    user_data = await resp.json()
-                    subscription_expiration_date = user_data.get('subscription_expiration')
+async def get_expired_users():
+    from api.models import User
+    return await sync_to_async(list)(User.objects.filter(subscription_expiration__lt=timezone.now()))
 
-                    if subscription_expiration_date and datetime.fromisoformat(subscription_expiration_date) < datetime.now():
-                        await bot.kick_chat_member(chat_id, user_id)
-                        print(f"User {user_id} has been removed from the group.")
+async def check_subscriptions(msg: Message):
+    from main import bot
+    users = await get_expired_users()
+    for user in users:
+        try:
+            await bot.kick_chat_member(chat_id=msg.chat.id, user_id=user.tg_id)
+        except Exception as e:
+            print(e)

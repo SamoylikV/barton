@@ -12,6 +12,7 @@ from dialogs import get_phone, get_tier, main_menu
 from aiogram_dialog import setup_dialogs
 from handlers import initialize_labels_cache
 from asgiref.sync import sync_to_async
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 
 load_dotenv()
@@ -20,6 +21,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api.settings')
 django.setup()
 
 API_TOKEN = os.getenv('API_TOKEN')
+bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 
 async def initialize_cache_if_needed():
@@ -30,7 +32,6 @@ async def initialize_cache_if_needed():
 
 async def main():
     logging.basicConfig(level=logging.INFO)
-    bot = Bot(token=API_TOKEN)
     dp.message.register(cmd_start, CommandStart())
     dp.message.register(get_contact_handler, F.content_type == ContentType.CONTACT)
     dp.include_router(get_phone)
