@@ -1,4 +1,4 @@
-from aiogram.types import Message, CallbackQuery, KeyboardButton, ReplyKeyboardMarkup
+from aiogram.types import Message, CallbackQuery, KeyboardButton, ReplyKeyboardMarkup, ChatMemberAdministrator
 from aiogram_dialog import DialogManager, StartMode, Dialog
 from aiogram_dialog.widgets.kbd import Button
 from aiogram import Bot
@@ -10,6 +10,7 @@ from states import GetPhoneSG, GetInfoSG, MainSG
 from datetime import datetime
 import json
 from django.utils import timezone
+from django.db.models import Q
 from asgiref.sync import sync_to_async
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../backend")
@@ -35,10 +36,13 @@ async def get_label(name: str):
     return labels_cache.get(name)
 
 async def cmd_start(msg: Message, dialog_manager: DialogManager):
+    from api.models import Groups
     if msg.chat.type == 'private':
         await send_contact(msg)
     else:
-        await check_subscriptions(msg.chat.id)
+        chat_id = str(msg.chat.id)
+        group, created = await sync_to_async(Groups.objects.get_or_create, thread_sensitive=True)(chat_id=chat_id)
+        await check_subscriptions()
 
 async def send_contact(msg: Message):
     if msg.chat.type == 'private':
@@ -130,15 +134,31 @@ async def on_platform_click(callback: CallbackQuery, button: Button, dialog_mana
 async def on_back_click(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     await dialog_manager.switch_to(MainSG.main)
     
+
+async def get_group_chat_ids():
+    from api.models import Groups
+    groups = await sync_to_async(list)(Groups.objects.all())
+    return [group.chat_id for group in groups]    
+
+    
 async def get_expired_users():
     from api.models import User
-    return await sync_to_async(list)(User.objects.filter(subscription_expiration__lt=timezone.now()))
+    query = Q(subscription_expiration__lt=timezone.now()) | Q(subscription_expiration__isnull=True)
+    users = await sync_to_async(list)(User.objects.filter(query).values_list('tg_id', flat=True))
+    return users
 
-async def check_subscriptions(msg: Message):
+async def check_subscriptions():
     from main import bot
-    users = await get_expired_users()
-    for user in users:
-        try:
-            await bot.kick_chat_member(chat_id=msg.chat.id, user_id=user.tg_id)
-        except Exception as e:
-            print(e)
+    group_chat_ids = await get_group_chat_ids()
+    for chat_id in group_chat_ids:
+        admin_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id)]
+        users = await get_expired_users()
+        for user in users:
+            try:
+                if user not in admin_list:
+                    await bot.ban_chat_member(chat_id=chat_id, user_id=user)
+            except Exception as e:
+                print(e)
+
+            
+            

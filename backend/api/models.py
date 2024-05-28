@@ -55,3 +55,9 @@ class Receipts(models.Model):
 
     def __str__(self):
         return self.name
+    
+class Groups(models.Model):
+    chat_id = models.CharField(max_length=100, unique=True)
+    
+    def __str__(self):
+        return self.chat_id
