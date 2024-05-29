@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete Event</title>
+    <title>Удалить Событие</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
 <body>
-    <h2>Delete Event</h2>
-    <p>Are you sure you want to delete "{{ event.title }}"?</p>
+    <h2>Удалить Событие</h2>
+    <p>Вы уверены, что хотите удалить "{{ event.title }}"?</p>
     <form method="post">
         {% csrf_token %}
-        <button type="submit">Delete</button>
-        <a href="{% url 'event_list' %}">Cancel</a>
+        <button type="submit">Удалить</button>
+        <a href="{% url 'event_list' %}">Отмена</a>
     </form>
 </body>
 </html>

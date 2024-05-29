@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if chat %}Edit Chat{% else %}Create Chat{% endif %}</title>
+    <title>{% if chat %}Редактировать Чат{% else %}Создать Чат{% endif %}</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
 <body>
-    <h2>{% if chat %}Edit Chat{% else %}Create Chat{% endif %}</h2>
+    <h2>{% if chat %}Редактировать Чат{% else %}Создать Чат{% endif %}</h2>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Save</button>
+        <button type="submit">Сохранить</button>
     </form>
 </body>
 </html>

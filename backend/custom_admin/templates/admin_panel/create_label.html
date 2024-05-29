@@ -1,15 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>{% if label %}Update{% else %}Create{% endif %} Label</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if label %}Обновить{% else %}Создать{% endif %} Метку</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
 <body>
-    <h1>{% if label %}Update{% else %}Create{% endif %} Label</h1>
+    <h1>{% if label %}Обновить{% else %}Создать{% endif %} Метку</h1>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">{% if label %}Update{% else %}Create{% endif %}</button>
+        <button type="submit">{% if label %}Обновить{% else %}Создать{% endif %}</button>
     </form>
-    <a href="{% url 'label_list' %}">Back to list</a>
+    <a href="{% url 'label_list' %}">Назад к списку</a>
 </body>
 </html>

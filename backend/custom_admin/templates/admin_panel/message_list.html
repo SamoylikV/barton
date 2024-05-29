@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список Сообщений</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <h1>Сообщения</h1>
+    <ul>
+    {% for message in messages %}
+        <li>{{ message.text }} - {{ message.date }} - {{ message.repeated }}
+            <a href="{% url 'update_message' message.pk %}">Редактировать</a>
+            <a href="{% url 'delete_message' message.pk %}">Удалить</a>
+        </li>
+    {% endfor %}
+    </ul>
+    <a href="{% url 'create_message' %}">Создать Сообщение</a>
+</body>
+</html>

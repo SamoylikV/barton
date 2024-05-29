@@ -49,7 +49,6 @@ async def send_contact(msg: Message):
         markup = ReplyKeyboardMarkup(keyboard=[[
             KeyboardButton(text="Поделиться контактом", request_contact=True)
         ]], resize_keyboard=True, one_time_keyboard=True)
-        # await msg.reply("Чтобы продолжить пользоваться ботом, вам нужно подтвердить свой номер.", reply_markup=markup)
         await msg.reply(await get_label('give_number'), reply_markup=markup)
     else:
         await msg.reply("123")
@@ -70,13 +69,12 @@ async def get_contact_handler(msg: Message, dialog_manager: DialogManager):
                         await dialog_manager.start(GetPhoneSG.confirm, mode=StartMode.RESET_STACK, data={'phone_number': phone_number})
             else:
                 await msg.reply(await get_label('error'))
-                # await msg.reply("Что-то пошло не так. Попробуйте ещё раз.")
-                
+     
 async def on_confirm_click(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     if button.widget_id.startswith('choose_tier'):
         dialog_manager.dialog_data['tier'] = button.widget_id
     await dialog_manager.next()
-    
+
 async def on_ready_click(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     await dialog_manager.start(GetInfoSG.choose_tier, mode=StartMode.RESET_STACK)
     
@@ -86,7 +84,6 @@ async def get_label(name: str):
             if resp.status == 200:
                 label = await resp.json()
                 return label.get('text')
-            
             
 async def send_payment_link(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     tier = dialog_manager.dialog_data.get('tier')
@@ -133,14 +130,12 @@ async def on_platform_click(callback: CallbackQuery, button: Button, dialog_mana
                     
 async def on_back_click(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     await dialog_manager.switch_to(MainSG.main)
-    
 
 async def get_group_chat_ids():
     from api.models import Groups
     groups = await sync_to_async(list)(Groups.objects.all())
     return [group.chat_id for group in groups]    
 
-    
 async def get_expired_users():
     from api.models import User
     query = Q(subscription_expiration__lt=timezone.now()) | Q(subscription_expiration__isnull=True)
@@ -159,6 +154,4 @@ async def check_subscriptions():
                     await bot.ban_chat_member(chat_id=chat_id, user_id=user)
             except Exception as e:
                 print(e)
-
-            
-            
+                

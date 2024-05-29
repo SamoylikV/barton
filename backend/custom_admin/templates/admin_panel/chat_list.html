@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chats List</title>
+    <title>Список Чатов</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
 <body>
-    <h2>Chats</h2>
-    <a href="{% url 'create_chat' %}">Create New Chat</a>
+    <h2>Чаты</h2>
+    <a href="{% url 'create_chat' %}">Создать Новый Чат</a>
     <ul>
         {% for chat in chats %}
             <li>
                 {{ chat.name }} - {{ chat.created_at }}
-                <a href="{% url 'update_chat' chat.pk %}">Edit</a>
-                <a href="{% url 'delete_chat' chat.pk %}">Delete</a>
+                <a href="{% url 'update_chat' chat.pk %}">Редактировать</a>
+                <a href="{% url 'delete_chat' chat.pk %}">Удалить</a>
             </li>
         {% endfor %}
     </ul>

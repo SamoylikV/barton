@@ -1,14 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Delete Label</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Удалить Метку</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
 <body>
-    <h1>Are you sure you want to delete "{{ label.name }}"?</h1>
+    <h1>Вы уверены, что хотите удалить "{{ label.name }}"?</h1>
     <form method="post">
         {% csrf_token %}
-        <button type="submit">Yes, delete</button>
+        <button type="submit">Да, удалить</button>
     </form>
-    <a href="{% url 'label_list' %}">Cancel</a>
+    <a href="{% url 'label_list' %}">Отмена</a>
 </body>
 </html>

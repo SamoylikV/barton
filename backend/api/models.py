@@ -25,13 +25,23 @@ class Labels(models.Model):
         ('menu', 'меню'),
         ('other', 'другое'),
     ]
-    label_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     text = models.TextField(blank=True)
     tag = models.CharField(max_length=20, choices=TAG_CHOICES, default='other')
 
+    def __init__(self, *args, **kwargs):
+        super(Labels, self).__init__(*args, **kwargs)
+        if not self.id:
+            self.text = "_"
+ 
     def __str__(self):
         return self.name
+
+    def delete(self, *args, **kwargs):
+        if self.name in ['give_number', 'error', 'name', 'surname', 'email', 'thanks', 'get_link', 'menu', 'platform', 'back', 'declined']:
+            return
+        super(Labels, self).delete(*args, **kwargs)
 
 class Events(models.Model):
     name = models.CharField(max_length=100)
@@ -61,3 +71,31 @@ class Groups(models.Model):
     
     def __str__(self):
         return self.chat_id
+    
+class Messages(models.Model):
+    text = models.TextField(blank=True)
+    date = models.DateTimeField()
+    repeated = models.BooleanField(default=False)
+    day_of_week = models.CharField(
+        max_length=9,
+        choices=[
+            ('Monday', 'Monday'),
+            ('Tuesday', 'Tuesday'),
+            ('Wednesday', 'Wednesday'),
+            ('Thursday', 'Thursday'),
+            ('Friday', 'Friday'),
+            ('Saturday', 'Saturday'),
+            ('Sunday', 'Sunday'),
+        ],
+        blank=True,
+        null=True
+    )
+    image = models.ImageField(upload_to='message_images/', blank=True, null=True)
+
+    def __str__(self):
+        return f"Message to be sent on {self.date} - Repeated: {self.repeated}"
+
+    def save(self, *args, **kwargs):
+        if not self.repeated:
+            self.day_of_week = None
+        super().save(*args, **kwargs)

@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from api.models import User, Labels, Events, Chats
-from .forms import LabelsForm, EventsForm, ChatsForm
+from api.models import User, Labels, Events, Chats, Messages
+from .forms import LabelsForm, EventsForm, ChatsForm, MessageForm
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 
@@ -110,3 +110,35 @@ def delete_event(request, pk):
         event.delete()
         return redirect('event_list')
     return render(request, 'admin_panel/delete_event.html', {'event': event})
+
+def message_list(request):
+    messages = Messages.objects.all()
+    return render(request, 'admin_panel/message_list.html', {'messages': messages})
+
+def create_message(request):
+    if request.method == 'POST':
+        form = MessageForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('message_list')
+    else:
+        form = MessageForm()
+    return render(request, 'admin_panel/message_form.html', {'form': form, 'message': None})
+
+def update_message(request, pk):
+    message = get_object_or_404(Messages, pk=pk)
+    if request.method == 'POST':
+        form = MessageForm(request.POST, request.FILES, instance=message)
+        if form.is_valid():
+            form.save()
+            return redirect('message_list')
+    else:
+        form = MessageForm(instance=message)
+    return render(request, 'admin_panel/message_form.html', {'form': form, 'message': message})
+
+def delete_message(request, pk):
+    message = get_object_or_404(Messages, pk=pk)
+    if request.method == 'POST':
+        message.delete()
+        return redirect('message_list')
+    return render(request, 'admin_panel/delete_message.html', {'message': message})

@@ -9,3 +9,6 @@
 *.pid
 .venv/
 *.json
+*.jpeg
+*.png
+*.webp
