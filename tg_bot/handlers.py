@@ -12,6 +12,8 @@ import json
 from django.utils import timezone
 from django.db.models import Q
 from asgiref.sync import sync_to_async
+from aiogram.types import FSInputFile
+
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../backend")
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api.settings')
@@ -155,3 +157,35 @@ async def check_subscriptions():
             except Exception as e:
                 print(e)
                 
+async def send_message_to_groups(message_id):
+    from api.models import Groups, Messages
+    from main import bot
+    message = await sync_to_async(Messages.objects.get)(pk=message_id)
+    print(os.getcwd())
+    group_ids = await sync_to_async(list)(Groups.objects.values_list('chat_id', flat=True))
+    for chat_id in group_ids:
+        try:
+            if message.image:
+                photo = FSInputFile(message.image.path, filename=message.image.path.split('/')[-1])
+                await bot.send_photo(chat_id, photo=photo, caption=message.text)
+            else:
+                await bot.send_message(chat_id, message.text)
+        except Exception as e:
+            print(e)
+    
+    
+@sync_to_async
+def get_messages_to_send():
+    from api.models import Messages
+    now = timezone.now()
+    return list(Messages.objects.filter(
+        (Q(date__lte=now) & Q(repeated=False)) | 
+        (Q(day_of_week=now.strftime('%A')) & Q(repeated=True))
+    ))
+
+async def check_and_send_messages():
+    messages_to_send = await get_messages_to_send()
+    for message in messages_to_send:
+        await send_message_to_groups(message.id)
+        if not message.repeated:
+            await sync_to_async(message.delete)()

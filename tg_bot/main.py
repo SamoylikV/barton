@@ -7,13 +7,14 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.enums import ContentType
 from aiogram.filters import CommandStart
 from dotenv import load_dotenv
-from handlers import cmd_start, get_contact_handler
+from handlers import cmd_start, get_contact_handler, check_and_send_messages
 from dialogs import get_phone, get_tier, main_menu
 from aiogram_dialog import setup_dialogs
 from handlers import initialize_labels_cache, check_subscriptions
 from asgiref.sync import sync_to_async
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-
+from django.db.models import Q
+from django.utils import timezone
 
 load_dotenv()
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../backend")
@@ -30,10 +31,10 @@ async def initialize_cache_if_needed():
     cache_file_path = get_cache_file_path()
     if not os.path.exists(cache_file_path):
         await sync_to_async(update_label_cache)()
-        
+
 def schedule_jobs():
     scheduler.add_job(check_subscriptions, 'cron', hour=0)
-
+    scheduler.add_job(check_and_send_messages, 'interval', seconds=10)
 
 async def main():
     logging.basicConfig(level=logging.INFO)
@@ -48,7 +49,6 @@ async def main():
     schedule_jobs()
     scheduler.start()
     await dp.start_polling(bot)
-
 
 if __name__ == '__main__':
     asyncio.run(main())

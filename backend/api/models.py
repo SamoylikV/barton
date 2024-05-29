@@ -74,7 +74,7 @@ class Groups(models.Model):
     
 class Messages(models.Model):
     text = models.TextField(blank=True)
-    date = models.DateTimeField()
+    date = models.DateTimeField(blank=True, null=True)
     repeated = models.BooleanField(default=False)
     day_of_week = models.CharField(
         max_length=9,
@@ -91,11 +91,23 @@ class Messages(models.Model):
         null=True
     )
     image = models.ImageField(upload_to='message_images/', blank=True, null=True)
+    send_now = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Message to be sent on {self.date} - Repeated: {self.repeated}"
+        return f"Сообщение: {self.text} - Дата: {self.date} - Повторять: {self.repeated}"
+
+    def clean(self):
+        if self.send_now and (self.date or self.day_of_week):
+            raise Exception('Нельзя указывать дату при рассылке сейчас')
+        if not self.send_now and not self.date:
+            raise Exception('Нету даты для рассылки')
 
     def save(self, *args, **kwargs):
-        if not self.repeated:
+        if self.send_now:
+            self.date = timezone.now()
+            self.day_of_week = None
+        elif not self.repeated:
             self.day_of_week = None
         super().save(*args, **kwargs)
+        
+

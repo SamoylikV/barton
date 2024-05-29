@@ -17,9 +17,16 @@ class ChatsForm(forms.ModelForm):
         fields = ['name', 'link']
         
 class MessageForm(forms.ModelForm):
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.send_now:
+            self.fields['date'].disabled = True
+            self.fields['day_of_week'].disabled = True
+            
     class Meta:
         model = Messages
-        fields = ['text', 'date', 'repeated', 'day_of_week', 'image']
+        fields = ['text', 'date', 'repeated', 'day_of_week', 'image', 'send_now']
         widgets = {
             'date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
         }

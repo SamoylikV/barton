@@ -76,3 +76,42 @@ p {
     width: 100%;
     max-width: 400px;
 }
+
+a.button {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 10px 15px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+a.button:hover {
+    background-color: #45a049;
+}
+
+a.edit-button {
+    background-color: #0066cc;
+}
+
+a.edit-button:hover {
+    background-color: #004999;
+}
+
+a.delete-button {
+    background-color: #f44336;
+}
+
+a.delete-button:hover {
+    background-color: #da190b;
+}
+
+.list-item {
+    margin-bottom: 20px;
+}

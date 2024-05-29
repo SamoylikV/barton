@@ -2,6 +2,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import User, Labels, Chats, Events
 from django.shortcuts import render, get_object_or_404
+import sys
+import os
+
 @csrf_exempt
 def create_user(request):
     tg_id = request.POST.get('tg_id')
@@ -64,3 +67,26 @@ def get_events(request):
     events = Events.objects.all()
     data = [{"event_id": event.event_id, "event_name": event.event_name, "event_date": event.event_date} for event in events]
     return JsonResponse(data, safe=False)
+
+@csrf_exempt
+def get_message_by_id(request, message_id):
+    if request.method == 'GET':
+        message = Chats.objects.get(message_id=message_id)
+        return JsonResponse({'message': message.message_text, 'date': message.date}, status=200)
+
+
+@csrf_exempt
+def trigger_send_message(request):
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+    from tg_bot.handlers import send_message_to_groups_sync
+    if request.method == 'POST':
+        message_id = request.POST.get('message_id')
+        if message_id:
+            try:
+                send_message_to_groups_sync(int(message_id))
+                return JsonResponse({'status': 'success'}, status=200)
+            except Exception as e:
+                return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+        else:
+            return JsonResponse({'status': 'error', 'message': 'No message_id provided'}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)

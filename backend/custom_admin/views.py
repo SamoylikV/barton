@@ -9,7 +9,8 @@ def dashboard(request):
     labels = Labels.objects.all()
     chats = Chats.objects.all()
     events = Events.objects.all()
-    return render(request, 'admin_panel/dashboard.html', {'users': users, 'labels': labels, 'chats': chats, 'events': events})
+    messages = Messages.objects.all()
+    return render(request, 'admin_panel/dashboard.html', {'users': users, 'labels': labels, 'chats': chats, 'events': events, 'messages': messages})
 
 def label_list(request):
     labels = Labels.objects.all()
@@ -141,4 +142,27 @@ def delete_message(request, pk):
     if request.method == 'POST':
         message.delete()
         return redirect('message_list')
-    return render(request, 'admin_panel/delete_message.html', {'message': message})
+    return render(request, 'admin_panel/message_confirm_delete.html', {'message': message})
+
+def message_form(request, pk=None):
+    if pk:
+        message = get_object_or_404(Messages, pk=pk)
+    else:
+        message = Messages()
+
+    if request.method == 'POST':
+        form = MessageForm(request.POST, request.FILES, instance=message)
+        if form.is_valid():
+            form.save()
+            return redirect('message_list')
+    else:
+        form = MessageForm(instance=message)
+    
+    return render(request, 'message_form.html', {'form': form})
+
+def message_delete(request, pk):
+    message = get_object_or_404(Messages, pk=pk)
+    if request.method == 'POST':
+        message.delete()
+        return redirect('message_list')
+    return render(request, 'message_confirm_delete.html', {'message': message})
