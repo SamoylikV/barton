@@ -32,10 +32,10 @@ async def initialize_labels_cache():
     global labels_cache
     labels_cache = await load_labels_from_cache()
 
-async def get_label(name: str):
-    if labels_cache is None:
-        await initialize_labels_cache()
-    return labels_cache.get(name)
+# async def get_label(name: str):
+#     if labels_cache is None:
+#         await initialize_labels_cache()
+#     return labels_cache.get(name)
 
 async def cmd_start(msg: Message, dialog_manager: DialogManager):
     from api.models import Groups

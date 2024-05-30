@@ -1,8 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from api.models import User, Labels, Events, Chats, Messages
+from api.models import User, Labels, Events, Chats, Messages, Metrics
 from .forms import LabelsForm, EventsForm, ChatsForm, MessageForm
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
 
 def dashboard(request):
     users = User.objects.all()
@@ -10,7 +8,8 @@ def dashboard(request):
     chats = Chats.objects.all()
     events = Events.objects.all()
     messages = Messages.objects.all()
-    return render(request, 'admin_panel/dashboard.html', {'users': users, 'labels': labels, 'chats': chats, 'events': events, 'messages': messages})
+    metrics = Metrics.objects.all()
+    return render(request, 'admin_panel/dashboard.html', {'users': users, 'labels': labels, 'chats': chats, 'events': events, 'messages': messages, 'metrics': metrics})
 
 def label_list(request):
     labels = Labels.objects.all()
@@ -158,11 +157,15 @@ def message_form(request, pk=None):
     else:
         form = MessageForm(instance=message)
     
-    return render(request, 'message_form.html', {'form': form})
+    return render(request, 'admin_panel/message_form.html', {'form': form})
 
 def message_delete(request, pk):
     message = get_object_or_404(Messages, pk=pk)
     if request.method == 'POST':
         message.delete()
         return redirect('message_list')
-    return render(request, 'message_confirm_delete.html', {'message': message})
+    return render(request, 'admin_panel/message_confirm_delete.html', {'message': message})
+
+def metrics_list(request):
+    metrics = Metrics.objects.all()
+    return render(request, 'admin_panel/metrics.html', {'metrics': metrics})

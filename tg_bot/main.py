@@ -34,7 +34,7 @@ async def initialize_cache_if_needed():
 
 def schedule_jobs():
     scheduler.add_job(check_subscriptions, 'cron', hour=0)
-    scheduler.add_job(check_and_send_messages, 'interval', seconds=10)
+    scheduler.add_job(check_and_send_messages, 'interval', minutes=1)
 
 async def main():
     logging.basicConfig(level=logging.INFO)

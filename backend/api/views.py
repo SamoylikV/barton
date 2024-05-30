@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import User, Labels, Chats, Events
+from .models import User, Labels, Chats, Events, Metrics
 from django.shortcuts import render, get_object_or_404
 import sys
 import os
@@ -90,3 +90,4 @@ def trigger_send_message(request):
         else:
             return JsonResponse({'status': 'error', 'message': 'No message_id provided'}, status=400)
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+

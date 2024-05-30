@@ -111,3 +111,20 @@ class Messages(models.Model):
         super().save(*args, **kwargs)
         
 
+class Metrics(models.Model):
+    id = models.AutoField(primary_key=True)
+    tg_id = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100, null=True)
+    spent = models.IntegerField(default=0)
+    registration_date = models.DateTimeField(auto_now_add=True)
+    month_since_join = models.IntegerField(default=0)
+    
+    def __str__(self):
+        return self.name
+
+    def update_metrics(self):
+        self.month_since_join = self.calculate_months_since_join()
+        self.save()
+
+    def calculate_months_since_join(self):
+        return (timezone.now() - self.registration_date).days // 30

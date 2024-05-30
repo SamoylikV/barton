@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from . import views
-from custom_admin.views import create_label, update_label, delete_label, create_message, update_message, delete_message, message_list
+from custom_admin.views import create_label, update_label, delete_label, create_message, update_message, delete_message, message_list, metrics_list
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -21,6 +21,7 @@ urlpatterns = [
     path('messages/create/', create_message, name='create_message'),
     path('messages/update/<int:pk>/', update_message, name='update_message'),
     path('messages/delete/<int:pk>/', delete_message, name='delete_message'),
+    path('metrics/', metrics_list, name='metrics_list'),
     # path('chats/', views.chat_list, name='chat_list'),
     # path('chats/create/', views.create_chat, name='create_chat'),
     # path('chats/<int:pk>/edit/', views.update_chat, name='update_chat'),

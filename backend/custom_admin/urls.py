@@ -19,5 +19,6 @@ urlpatterns = [
     path('messages/create/', views.create_message, name='create_message'),
     path('messages/update/<int:pk>/', views.update_message, name='update_message'),
     path('messages/delete/<int:pk>/', views.delete_message, name='delete_message'),
+    path('metrics/', views.metrics_list, name='metrics_list'),
     path('', views.dashboard, name='dashboard'),
 ]
