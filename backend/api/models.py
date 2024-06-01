@@ -87,9 +87,8 @@ class Messages(models.Model):
             ('Saturday', 'Saturday'),
             ('Sunday', 'Sunday'),
         ],
-        blank=True,
-        null=True
-    )
+        blank=True
+        )
     image = models.ImageField(upload_to='message_images/', blank=True, null=True)
     send_now = models.BooleanField(default=False)
 
@@ -114,7 +113,7 @@ class Messages(models.Model):
 class Metrics(models.Model):
     id = models.AutoField(primary_key=True)
     tg_id = models.CharField(max_length=100, unique=True)
-    name = models.CharField(max_length=100, null=True)
+    name = models.CharField(max_length=100, blank=True)
     spent = models.IntegerField(default=0)
     registration_date = models.DateTimeField(auto_now_add=True)
     month_since_join = models.IntegerField(default=0)
