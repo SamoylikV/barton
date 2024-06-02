@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import User, Labels, Chats, Events, Metrics
+from .models import User, Labels, Chats, Events, Metrics, Receipts
 from django.shortcuts import render, get_object_or_404
 import sys
 import os
@@ -91,3 +91,24 @@ def trigger_send_message(request):
             return JsonResponse({'status': 'error', 'message': 'No message_id provided'}, status=400)
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
+@csrf_exempt
+def create_receipt(request):
+    name = request.POST.get('name')
+    link = request.POST.get('link')
+    tg_id = request.POST.get('tg_id')
+    deal_id = request.POST.get('deal_id')
+    deal_number = request.POST.get('deal_number')
+    tier = request.POST.get('tier')
+    receipt = Receipts(name=name, link=link, tg_id=tg_id, deal_id=deal_id, deal_number=deal_number, tier=tier)
+    receipt.save()
+    
+@csrf_exempt
+def get_receipts(request):
+    receipts = Receipts.objects.all()
+    data = [{"name": receipt.name, "link": receipt.link, "deal_id": receipt.deal_id, "deal_number": receipt.deal_number, "tg_id": receipt.tg_id, "tier": receipt.tier, "payed": receipt.payed} for receipt in receipts]
+    return JsonResponse(data, safe=False)
+
+@csrf_exempt
+def remove_receipt(request):
+    receipt = get_object_or_404(Receipts, tg_id=request.POST.get('tg_id'), deal_id=request.POST.get('deal_id'), deal_number=request.POST.get('deal_number'))
+    receipt.delete()

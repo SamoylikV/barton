@@ -61,8 +61,11 @@ class Chats(models.Model):
 class Receipts(models.Model):
     name = models.CharField(max_length=100)
     link = models.CharField(max_length=100)
+    deal_id = models.CharField(max_length=100, blank=True)
+    deal_number = models.CharField(max_length=100, blank=True)
     tg_id = models.CharField(max_length=100)
-
+    tier = models.CharField(max_length=100, blank=True)
+    payed = models.BooleanField(default=False)
     def __str__(self):
         return self.name
     
@@ -87,7 +90,8 @@ class Messages(models.Model):
             ('Saturday', 'Saturday'),
             ('Sunday', 'Sunday'),
         ],
-        blank=True
+        blank=True,
+        null=True
         )
     image = models.ImageField(upload_to='message_images/', blank=True, null=True)
     send_now = models.BooleanField(default=False)
@@ -113,7 +117,7 @@ class Messages(models.Model):
 class Metrics(models.Model):
     id = models.AutoField(primary_key=True)
     tg_id = models.CharField(max_length=100, unique=True)
-    name = models.CharField(max_length=100, blank=True)
+    name = models.CharField(max_length=100, blank=True, null=True)
     spent = models.IntegerField(default=0)
     registration_date = models.DateTimeField(auto_now_add=True)
     month_since_join = models.IntegerField(default=0)
