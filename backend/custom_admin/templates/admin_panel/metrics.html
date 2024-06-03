@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Метрики</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <a href="{% url 'dashboard' %}" class="metrics-button">Назад к панели</a>
+    <h1>Метрики пользователей</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Telegram ID</th>
+                <th>Имя</th>
+                <th>Потрачено</th>
+                <th>Дата регистрации</th>
+                <th>Месяцев с момента регистрации</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for metric in metrics %}
+            <tr>
+                <td>{{ metric.id }}</td>
+                <td>{{ metric.tg_id }}</td>
+                <td>{{ metric.name }}</td>
+                <td>{{ metric.spent }}</td>
+                <td>{{ metric.registration_date }}</td>
+                <td>{{ metric.month_since_join }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

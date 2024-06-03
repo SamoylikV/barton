@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель Администратора</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <a href="{% url 'metrics_list' %}" class="metrics-button">Просмотр метрик</a>
+    <h1>Панель Администратора</h1>
+    
+    <h2>Пользователи</h2>
+    <ul>
+        {% for user in users %}
+            <li class="list-item">{{ user.tg_id }} - {{ user.email }} - {{ user.number }}</li>
+        {% endfor %}
+    </ul>
+    
+    <h2>Метки</h2>
+    <a href="{% url 'create_label' %}" class="button">Создать новую метку</a>
+    <ul>
+        {% for label in labels %}
+            <li class="list-item">{{ label.name }} - {{ label.text }} - {{ label.tag }}
+                <div>
+                    <a href="{% url 'update_label' label.name %}" class="button edit-button">Редактировать</a>
+                    <a href="{% url 'delete_label' label.name %}" class="button delete-button">Удалить</a>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+    
+    <h2>Чаты</h2>
+    <a href="{% url 'create_chat' %}" class="button">Создать новый чат</a>
+    <ul>
+        {% for chat in chats %}
+            <li class="list-item">{{ chat.name }} - {{ chat.link }}
+                <div>
+                    <a href="{% url 'update_chat' chat.pk %}" class="button edit-button">Редактировать</a>
+                    <a href="{% url 'delete_chat' chat.pk %}" class="button delete-button">Удалить</a>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+    
+    <h2>События</h2>
+    <a href="{% url 'create_event' %}" class="button">Создать новое событие</a>
+    <ul>
+        {% for event in events %}
+            <li class="list-item">{{ event.title }} - {{ event.start_time }} до {{ event.end_time }}
+                <div>
+                    <a href="{% url 'update_event' event.pk %}" class="button edit-button">Редактировать</a>
+                    <a href="{% url 'delete_event' event.pk %}" class="button delete-button">Удалить</a>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h2>Сообщения</h2>
+    <a href="{% url 'create_message' %}" class="button">Создать новое сообщение</a>
+    <ul>
+        {% for message in messages %}
+            <li class="list-item">{{ message.text }} - {{ message.date }} - {{ message.repeated }}
+                <div>
+                    <a href="{% url 'update_message' message.pk %}" class="button edit-button">Редактировать</a>
+                    <a href="{% url 'delete_message' message.pk %}" class="button delete-button">Удалить</a>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+    
+</body>
+</html>

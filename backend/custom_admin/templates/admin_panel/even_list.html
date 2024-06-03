@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список Событий</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <h2>События</h2>
+    <a href="{% url 'create_event' %}">Создать Новое Событие</a>
+    <ul>
+        {% for event in events %}
+            <li>
+                {{ event.title }} - {{ event.start_time }} до {{ event.end_time }}
+                <a href="{% url 'update_event' event.pk %}">Редактировать</a>
+                <a href="{% url 'delete_event' event.pk %}">Удалить</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

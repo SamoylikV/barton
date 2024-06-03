@@ -1,57 +1,53 @@
 import os
-import asyncio
+import sys
 import logging
+import asyncio
+import django
 from aiogram import Bot, Dispatcher, F
 from aiogram.enums import ContentType
 from aiogram.filters import CommandStart
-from aiogram.types import CallbackQuery, KeyboardButton, ReplyKeyboardMarkup, Message, Contact
-from aiogram_dialog import DialogManager, setup_dialogs, StartMode
-from dialogs import general, GeneralSG
-from aiogram.fsm.state import State, StatesGroup
-import aiohttp
 from dotenv import load_dotenv
+from handlers import cmd_start, get_contact_handler, check_and_send_messages
+from dialogs import get_phone, get_tier, main_menu
+from aiogram_dialog import setup_dialogs
+from handlers import initialize_labels_cache, check_subscriptions
+from asgiref.sync import sync_to_async
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from django.db.models import Q
+from django.utils import timezone
 
 load_dotenv()
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../backend")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api.settings')
+django.setup()
 
 API_TOKEN = os.getenv('API_TOKEN')
-BASE_URL = os.getenv('BASE_URL')
+bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
+scheduler = AsyncIOScheduler()
 
+async def initialize_cache_if_needed():
+    from api.signals import update_label_cache, get_cache_file_path
+    cache_file_path = get_cache_file_path()
+    if not os.path.exists(cache_file_path):
+        await sync_to_async(update_label_cache)()
 
-@dp.message(F.content_type == ContentType.CONTACT)
-async def get_contact(msg: Message, dialog_manager: DialogManager):
-    phone_number = msg.contact.phone_number
-    user_data = {
-        'tg_id': msg.from_user.id,
-        'number': phone_number
-    }
-
-    async with aiohttp.ClientSession() as session:
-        async with session.post(f'{BASE_URL}/users/create/', data=user_data) as resp:
-            if resp.status == 201:
-                await dialog_manager.start(GeneralSG.confirm, mode=StartMode.RESET_STACK, data={'phone_number': phone_number})
-            elif resp.status == 200:
-                async with session.put(f'{BASE_URL}/users/update/{msg.from_user.id}/', data=user_data) as update_resp:
-                    if update_resp.status == 200:
-                        await dialog_manager.start(GeneralSG.confirm, mode=StartMode.RESET_STACK, data={'phone_number': phone_number})
-            else:
-                await msg.reply("Что-то пошло не так. Попробуйте ещё раз.")
-
-async def send_contact(msg: Message):
-    markup = ReplyKeyboardMarkup(keyboard=[[
-        KeyboardButton(text="Поделиться контактом", request_contact=True)
-    ]], resize_keyboard=True, one_time_keyboard=True)
-    await msg.reply("Чтобы продолжить пользоваться ботом, вам нужно подтвердить свой номер.", reply_markup=markup)
-
-async def cmd_start(msg: Message, dialog_manager: DialogManager):
-    await send_contact(msg)
+def schedule_jobs():
+    scheduler.add_job(check_subscriptions, 'cron', hour=0)
+    scheduler.add_job(check_and_send_messages, 'interval', minutes=1)
 
 async def main():
     logging.basicConfig(level=logging.INFO)
-    bot = Bot(token=API_TOKEN)
     dp.message.register(cmd_start, CommandStart())
-    dp.include_router(general)
+    dp.message.register(get_contact_handler, F.content_type == ContentType.CONTACT)
+    dp.include_router(get_phone)
+    dp.include_router(get_tier)
+    dp.include_router(main_menu)
     setup_dialogs(dp)
+    await initialize_cache_if_needed()
+    await initialize_labels_cache()
+    schedule_jobs()
+    scheduler.start()
     await dp.start_polling(bot)
 
 if __name__ == '__main__':

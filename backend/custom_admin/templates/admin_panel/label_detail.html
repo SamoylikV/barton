@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детали Метки</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <h1>Детали Метки</h1>
+    <p>Название: {{ label.name }}</p>
+    <p>Текст: {{ label.text }}</p>
+    <p>Тег: {{ label.tag }}</p>
+    <a href="{% url 'update_label' label.name %}">Редактировать</a>
+    <a href="{% url 'delete_label' label.name %}">Удалить</a>
+    <a href="{% url 'label_list' %}">Назад к списку</a>
+</body>
+</html>
