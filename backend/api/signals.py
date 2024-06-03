@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_migrate
 from django.dispatch import receiver
 from .models import Labels, Metrics, User, Receipts
 from django.utils import timezone
@@ -37,3 +37,32 @@ def update_receipts_metrics(sender, instance, **kwargs):
         metrics.update_metrics()
     except Metrics.DoesNotExist:
         pass
+    
+@receiver(post_migrate)
+def create_default_labels(sender, **kwargs):
+    if not Labels.objects.exists():
+        default_labels = {
+            'give_number': 'Приветсвие\nНажмите "Поделиться номером" внизу экрана...',
+            'error': 'Произошла ошибка. Попробуйте снова.',
+            'name': 'Введите ваше имя',
+            'surname': 'Введите ваша фамилия',
+            'email': 'Введите ваш электронной почты',
+            'thanks': 'Получить ссылку для оплаты',
+            'get_link': 'Спасибо за регистрацию!',
+            'menu': 'Выберите пункт меню',
+            'platform': 'Чаты',
+            'back': 'Вернуться назад.',
+            'declined': 'Отказано',
+            'next': 'Дальше',
+            'all_done': 'Все готово!',
+            'choose_tier': 'Выберите уровень подписки',
+            'tier_1': 'Месяц',
+            'tier_2': '2 месяца',
+            'free_help': 'Получите бесплатную помощь',
+            'club_discount': 'Скидка для членов клуба',
+            'neuro_mark': 'Нейро-марк',
+            'nearest_events': 'Ближайшие события',
+            'library': 'Библиотека'
+        }
+        for label, text in default_labels.items():
+            Labels.objects.create(name=label, text=text)

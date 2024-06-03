@@ -29,17 +29,17 @@ class Labels(models.Model):
     name = models.CharField(max_length=100)
     text = models.TextField(blank=True)
     tag = models.CharField(max_length=20, choices=TAG_CHOICES, default='other')
-
-    def __init__(self, *args, **kwargs):
-        super(Labels, self).__init__(*args, **kwargs)
-        if not self.id:
-            self.text = "_"
  
     def __str__(self):
         return self.name
 
     def delete(self, *args, **kwargs):
-        if self.name in ['give_number', 'error', 'name', 'surname', 'email', 'thanks', 'get_link', 'menu', 'platform', 'back', 'declined']:
+        if self.name in [
+            'give_number', 'error', 'name', 'surname', 'email', 
+            'thanks', 'get_link', 'menu', 'platform', 'back', 'declined',
+            'next', 'all_done', 'choose_tier', 'tier_1', 'tier_2', 
+            'free_help', 'club_discount', 'neuro_mark', 'nearest_events'
+        ]:
             return
         super(Labels, self).delete(*args, **kwargs)
 

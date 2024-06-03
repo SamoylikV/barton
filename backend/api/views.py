@@ -93,14 +93,19 @@ def trigger_send_message(request):
 
 @csrf_exempt
 def create_receipt(request):
-    name = request.POST.get('name')
-    link = request.POST.get('link')
-    tg_id = request.POST.get('tg_id')
-    deal_id = request.POST.get('deal_id')
-    deal_number = request.POST.get('deal_number')
-    tier = request.POST.get('tier')
-    receipt = Receipts(name=name, link=link, tg_id=tg_id, deal_id=deal_id, deal_number=deal_number, tier=tier)
-    receipt.save()
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        link = request.POST.get('link')
+        tg_id = request.POST.get('tg_id')
+        deal_id = request.POST.get('deal_id')
+        deal_number = request.POST.get('deal_number')
+        tier = request.POST.get('tier')
+        receipt = Receipts(name=name, link=link, tg_id=tg_id, deal_id=deal_id, deal_number=deal_number, tier=tier)
+        receipt.save()
+        return JsonResponse({'status': 'success'}, status=200)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+    
     
 @csrf_exempt
 def get_receipts(request):
@@ -110,5 +115,9 @@ def get_receipts(request):
 
 @csrf_exempt
 def remove_receipt(request):
-    receipt = get_object_or_404(Receipts, tg_id=request.POST.get('tg_id'), deal_id=request.POST.get('deal_id'), deal_number=request.POST.get('deal_number'))
-    receipt.delete()
+    if request.method == 'POST':
+        receipt = get_object_or_404(Receipts, tg_id=request.POST.get('tg_id'), deal_id=request.POST.get('deal_id'), deal_number=request.POST.get('deal_number'))
+        receipt.delete()
+        return JsonResponse({'status': 'success'}, status=200)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
